@@ -1,1 +1,1 @@
-# math-mini-porject
+# math-mini-project
