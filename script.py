@@ -3,6 +3,12 @@ import csv
 import time
 import sys, getopt
 import datetime
+import os
+from dotenv import load_dotenv
+
+from stocks import HNX_STOCK_LIST
+
+load_dotenv()
 
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 # https://finfo-api.vndirect.com.vn/v4/stock_prices?sort=date&q=~date:gte:2021-01-01~date:lte:2021-06-30&size=5&page=2
@@ -52,16 +58,32 @@ def init_csv_file(start_date = BASE_START_DATE, end_date =  BASE_END_DATE):
     ts = time.time()
     ts = int(ts)
     filename = 'data_stock_'+start_date+'_'+end_date+'_'+(str(ts))+'.csv'
-    with open(filename, mode='w') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=FIELDS)
-        writer.writeheader()
+    if(os.getenv('VIEW_ONLY') in ['True', 'true', '1']):
+        with open(filename, mode='w') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=FIELDS)
+            writer.writeheader()
 
     return filename
 
-def write_to_csv(filename, ele):
-    with open(filename, 'a', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS)
-        writer.writerow(ele)
+def write_to_csv(filename, ele, floor = 'HNX', code='', is_all_code = True):
+    if(os.getenv('VIEW_ONLY') in ['True', 'true', '1']):
+        with open(filename, 'a', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=FIELDS)
+            if (ele['floor'] == floor):
+                if is_all_code is True:
+                    writer.writerow(ele)
+                else:
+                    if code != '':
+                        if ele['code'] == code:
+                            writer.writerow(ele)
+    else:
+        if (ele['floor'] == floor):
+            if is_all_code is True:
+                print(ele)
+            else:
+                if code != '':
+                    if ele['code'] == code:
+                        print(ele)
 
 def run(argv):
     start_date = BASE_START_DATE
@@ -69,8 +91,12 @@ def run(argv):
     end_date = BASE_END_DATE
     end_ts = int(datetime.datetime.strptime(end_date, FORMAT).timestamp())
     size = SIZE
-    options = "h:b:e:s:"
-    long_options = ["Help","Begin", "End", "Size"]
+    floor = 'HNX'
+    code = ''
+    is_all_code = True
+
+    options = "h:b:e:s:f:c"
+    long_options = ["Help","Begin", "End", "Size", "Floor", "Code"]
 
     try:
       opts, args = getopt.getopt(argv, options, long_options)
@@ -102,28 +128,30 @@ def run(argv):
             except ValueError:
                 print("Size must be integer")
                 exit(0)
-            
+
             if (int(size) <= 0):
                 print('Size is not valid')
                 exit(0)
+        elif opt in ("-f", "--Floor"):
+            floor = arg
+        elif opt in ("-c", "--Code"):
+            code = arg
+            is_all_code = False
 
     if (end_ts < start_ts):
         print('End Date must greater than Start Date')
         exit(0)
 
-    
+
     file_name = init_csv_file(start_date, end_date)
     total_pages, total_elements, size =  init(start_date = start_date, end_date = end_date, size = size)
-    
-    assert (int(total_elements) != 0 and int(total_pages) != 0), 'No Data Retrieved'
 
+    assert (int(total_elements) != 0 and int(total_pages) != 0), 'No Data Retrieved'
+    
     for page in range(1, total_pages+1):
         data = get_data(start_date, end_date, size, page)
         for ele in data:
-            write_to_csv(file_name, ele)
-    
+            write_to_csv(file_name, ele, floor, code, is_all_code)
+
 if __name__ == '__main__':
     run(sys.argv[1:])
-
-
-    
