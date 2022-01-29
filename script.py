@@ -18,7 +18,7 @@ STOCK_PRICES_URL = BASE_URL+'v4/stock_prices'
 SIZE = 20
 FORMAT = "%Y-%m-%d"
 BASE_START_DATE = '2021-01-01' #format yyyy-MM-dd
-BASE_END_DATE = '2021-01-05'
+BASE_END_DATE = '2021-01-04'
 
 FIELDS = [
     'code', 'date', 'time', 'floor',
@@ -58,15 +58,15 @@ def init_csv_file(start_date = BASE_START_DATE, end_date =  BASE_END_DATE):
     ts = time.time()
     ts = int(ts)
     filename = 'data_stock_'+start_date+'_'+end_date+'_'+(str(ts))+'.csv'
-    if(os.getenv('VIEW_ONLY') in ['True', 'true', '1']):
-        with open(filename, mode='w') as csv_file:
+    if(os.getenv('VIEW_ONLY') not in ['True', 'true', '1']):
+        with open(filename, mode='w',  newline='') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=FIELDS)
             writer.writeheader()
 
     return filename
 
 def write_to_csv(filename, ele, floor = 'HNX', code='', is_all_code = True):
-    if(os.getenv('VIEW_ONLY') in ['True', 'true', '1']):
+    if(os.getenv('VIEW_ONLY') not in ['True', 'true', '1']):
         with open(filename, 'a', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=FIELDS)
             if (ele['floor'] == floor):
@@ -153,5 +153,7 @@ def run(argv):
         for ele in data:
             write_to_csv(file_name, ele, floor, code, is_all_code)
 
+    return file_name
+
 if __name__ == '__main__':
-    run(sys.argv[1:])
+    file_name = run(sys.argv[1:])
