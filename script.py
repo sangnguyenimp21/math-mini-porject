@@ -19,6 +19,7 @@ SIZE = 20
 FORMAT = "%Y-%m-%d"
 BASE_START_DATE = '2021-01-01' #format yyyy-MM-dd
 BASE_END_DATE = '2021-01-04'
+FLOOR = 'HNX'
 
 FIELDS = [
     'code', 'date', 'time', 'floor',
@@ -91,7 +92,7 @@ def run(argv):
     end_date = BASE_END_DATE
     end_ts = int(datetime.datetime.strptime(end_date, FORMAT).timestamp())
     size = SIZE
-    floor = 'HNX'
+    floor = FLOOR
     code = ''
     is_all_code = True
 
@@ -101,11 +102,11 @@ def run(argv):
     try:
       opts, args = getopt.getopt(argv, options, long_options)
     except getopt.GetoptError:
-        print('script.py -b <Start date> -e <End date> -s <Size>')
+        print('python script.py -b <Start date> -e <End date> -s <Size> -f <Floor> -c <Code>')
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-i", "--Help"):
-            print('script.py -b <Start date> -e <End date> -s <Size>')
+            print('python script.py -b <Start date> -e <End date> -s <Size> -f <Floor> -c <Code>')
             sys.exit()
         elif opt in ("-b", "--Begin"):
             start_date = arg
