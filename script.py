@@ -42,7 +42,8 @@ def init(start_date = BASE_START_DATE, end_date = BASE_END_DATE, size = SIZE):
 def get_url(start_date = BASE_START_DATE, end_date = BASE_END_DATE, size = SIZE, page = None):
     url = STOCK_PRICES_URL+'?'
     url += 'sort=date'
-    url += '&q=~date:gte:'+start_date+'~date:lte:'+end_date
+    url += '&q='
+    url += '~date:lte:'+end_date+'~date:gte:'+start_date
     url += '&size='+str(size)
     if page is not None:
         url += '&page='+str(page)

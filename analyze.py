@@ -25,7 +25,7 @@ for code in codes:
     # data_cum_returns = (1 + data_returns).cumprod() -1
 
     sum_change = data_change.sum()
-    change_score = data_close.tail(1).item() - data_close.head(1).item()
+    change_score = data_close.head(1).item() - data_close.tail(1).item()
 
     # print(code, sum)
     list_stock_change.append((code, change_score))
